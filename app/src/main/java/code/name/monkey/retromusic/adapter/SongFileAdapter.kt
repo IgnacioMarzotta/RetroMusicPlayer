@@ -60,6 +60,8 @@ class SongFileAdapter(
         return dataSet[position].hashCode().toLong()
     }
 
+    fun getItem(position: Int): File = dataSet[position]
+
     fun swapDataSet(songFiles: List<File>) {
         this.dataSet = songFiles
         notifyDataSetChanged()

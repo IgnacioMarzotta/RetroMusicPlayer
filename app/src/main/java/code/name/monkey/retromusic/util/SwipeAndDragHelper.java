@@ -14,24 +14,36 @@
 
 package code.name.monkey.retromusic.util;
 
+import android.content.Context;
 import android.graphics.Canvas;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
+import code.name.monkey.retromusic.R;
+import code.name.monkey.retromusic.helper.MusicPlayerRemote;
+import code.name.monkey.retromusic.model.Song;
+
 public class SwipeAndDragHelper extends ItemTouchHelper.Callback {
 
   private final ActionCompletionContract contract;
+  private final Context context;
 
-  public SwipeAndDragHelper(@NonNull ActionCompletionContract contract) {
+  public SwipeAndDragHelper(@NonNull ActionCompletionContract contract, @NonNull Context context) {
     this.contract = contract;
+    this.context = context;
   }
 
   @Override
   public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
     int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN;
-    return makeMovementFlags(dragFlags, 0);
+    int swipeFlags = 0;
+    if(PreferenceUtil.INSTANCE.isSwipeToQueueEnabled()) {
+      swipeFlags = ItemTouchHelper.RIGHT;
+    }
+    return makeMovementFlags(dragFlags, swipeFlags);
   }
 
   @Override
@@ -44,7 +56,15 @@ public class SwipeAndDragHelper extends ItemTouchHelper.Callback {
   }
 
   @Override
-  public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {}
+  public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+    contract.onViewSwiped(viewHolder.getLayoutPosition());
+  }
+
+  public void addSongToQueue(@NonNull Song song) {
+    MusicPlayerRemote.INSTANCE.playNext(song);
+    String message = context.getString(R.string.added_title_to_playing_queue, song.getTitle());
+    Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+  }
 
   @Override
   public boolean isLongPressDragEnabled() {
@@ -69,5 +89,7 @@ public class SwipeAndDragHelper extends ItemTouchHelper.Callback {
 
   public interface ActionCompletionContract {
     void onViewMoved(int oldPosition, int newPosition);
+
+    void onViewSwiped(int position);
   }
 }
