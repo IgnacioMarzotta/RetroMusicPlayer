@@ -39,6 +39,7 @@ import com.google.android.material.transition.MaterialContainerTransform
 import com.google.android.material.transition.MaterialSharedAxis
 import com.h6ah4i.android.widget.advrecyclerview.animator.DraggableItemAnimator
 import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager
+import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
@@ -159,15 +160,16 @@ class PlaylistDetailsFragment : AbsMainActivityFragment(R.layout.fragment_playli
         )
 
         val dragDropManager = RecyclerViewDragDropManager()
-
-        val wrappedAdapter: RecyclerView.Adapter<*> =
-            dragDropManager.createWrappedAdapter(playlistSongAdapter)
+        val swipeManager = RecyclerViewSwipeManager()
+        var wrappedAdapter: RecyclerView.Adapter<*> = dragDropManager.createWrappedAdapter(playlistSongAdapter)
+        wrappedAdapter = swipeManager.createWrappedAdapter(wrappedAdapter)
 
         binding.recyclerView.apply {
             adapter = wrappedAdapter
             layoutManager = LinearLayoutManager(requireContext())
             itemAnimator = DraggableItemAnimator()
             dragDropManager.attachRecyclerView(this)
+            swipeManager.attachRecyclerView(this)
             ThemedFastScroller.create(this)
         }
         playlistSongAdapter.registerAdapterDataObserver(object :

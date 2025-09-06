@@ -16,6 +16,7 @@ package code.name.monkey.retromusic.adapter.song
 
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
@@ -27,6 +28,7 @@ import code.name.monkey.retromusic.dialogs.RemoveSongFromPlaylistDialog
 import code.name.monkey.retromusic.fragments.LibraryViewModel
 import code.name.monkey.retromusic.helper.MusicPlayerRemote
 import code.name.monkey.retromusic.model.Song
+import code.name.monkey.retromusic.util.PreferenceUtil
 import code.name.monkey.retromusic.util.ViewUtil
 import com.h6ah4i.android.widget.advrecyclerview.draggable.DraggableItemAdapter
 import com.h6ah4i.android.widget.advrecyclerview.draggable.ItemDraggableRange
@@ -34,13 +36,20 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
+import com.h6ah4i.android.widget.advrecyclerview.swipeable.SwipeableItemAdapter
+import com.h6ah4i.android.widget.advrecyclerview.swipeable.SwipeableItemConstants
+import com.h6ah4i.android.widget.advrecyclerview.swipeable.action.SwipeResultAction
+import com.h6ah4i.android.widget.advrecyclerview.swipeable.action.SwipeResultActionDefault
+import com.h6ah4i.android.widget.advrecyclerview.swipeable.SwipeableItemViewHolder
+
 class OrderablePlaylistSongAdapter(
     private val playlistId: Long,
     activity: FragmentActivity,
     dataSet: MutableList<Song>,
     itemLayoutRes: Int,
 ) : SongAdapter(activity, dataSet, itemLayoutRes),
-    DraggableItemAdapter<OrderablePlaylistSongAdapter.ViewHolder> {
+    DraggableItemAdapter<OrderablePlaylistSongAdapter.ViewHolder>,
+    SwipeableItemAdapter<OrderablePlaylistSongAdapter.ViewHolder> {
 
     val libraryViewModel: LibraryViewModel by activity.viewModel()
 
@@ -83,7 +92,7 @@ class OrderablePlaylistSongAdapter(
         }
     }
 
-    inner class ViewHolder(itemView: View) : SongAdapter.ViewHolder(itemView) {
+    inner class ViewHolder(itemView: View) : SongAdapter.ViewHolder(itemView), SwipeableItemViewHolder {
 
         override var songMenuRes: Int
             get() = R.menu.menu_item_playlist_song
@@ -114,6 +123,12 @@ class OrderablePlaylistSongAdapter(
         init {
             dragView?.isVisible = true
         }
+
+        private val swipeableContainer: View = itemView.findViewById(R.id.container)
+
+        override fun getSwipeableContainerView(): View {
+            return swipeableContainer
+        }
     }
 
     override fun onCheckCanStartDrag(holder: ViewHolder, position: Int, x: Int, y: Int): Boolean {
@@ -132,6 +147,37 @@ class OrderablePlaylistSongAdapter(
     }
 
     override fun onGetItemDraggableRange(holder: ViewHolder, position: Int): ItemDraggableRange? {
+        return null
+    }
+
+    override fun onGetSwipeReactionType(holder: ViewHolder, position: Int, x: Int, y: Int): Int {
+        return if (PreferenceUtil.isSwipeToQueueEnabled) {
+            SwipeableItemConstants.REACTION_CAN_SWIPE_RIGHT
+        } else {
+            SwipeableItemConstants.REACTION_CAN_NOT_SWIPE_RIGHT
+        }
+    }
+
+    override fun onSwipeItemStarted(
+        holder: ViewHolder,
+        position: Int
+    ) { }
+
+    override fun onSetSwipeBackground(holder: ViewHolder, position: Int, type: Int) { }
+
+    override fun onSwipeItem(holder: ViewHolder, position: Int, result: Int): SwipeResultAction? {
+        if (result == SwipeableItemConstants.RESULT_SWIPED_RIGHT) {
+            val song = dataSet[position]
+            return object : SwipeResultActionDefault() {
+                override fun onPerformAction() {
+                    super.onPerformAction()
+                    MusicPlayerRemote.playNext(song)
+                    val message = activity.getString(R.string.added_title_to_playing_queue, song.title)
+                    Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
+                    notifyItemChanged(position)
+                }
+            }
+        }
         return null
     }
 
