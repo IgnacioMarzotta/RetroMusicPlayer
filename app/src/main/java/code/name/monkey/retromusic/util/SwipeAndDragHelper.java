@@ -16,6 +16,9 @@ package code.name.monkey.retromusic.util;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -81,10 +84,34 @@ public class SwipeAndDragHelper extends ItemTouchHelper.Callback {
           int actionState,
           boolean isCurrentlyActive) {
     if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
+      if (dX > 0) {
+        View itemView = viewHolder.itemView;
+        Paint paint = new Paint();
+        paint.setColor(context.getResources().getColor(R.color.widget_circle_button_color));
+
+        c.drawRect((float) itemView.getLeft(),
+                   (float) itemView.getTop(),
+                   (float) itemView.getLeft() + dX,
+                   (float) itemView.getBottom(), paint);
+
+        Drawable icon = context.getDrawable(R.drawable.ic_queue_music);
+        if (icon != null) {
+          int margin = (itemView.getHeight() - icon.getIntrinsicHeight()) / 2;
+          int top = itemView.getTop() + margin;
+          int left = itemView.getLeft() + margin;
+          int right = left + icon.getIntrinsicWidth();
+          int bottom = top + icon.getIntrinsicHeight();
+          icon.setBounds(left, top, right, bottom);
+          icon.draw(c);
+        }
+      }
+
       float alpha = 1 - (Math.abs(dX) / recyclerView.getWidth());
       viewHolder.itemView.setAlpha(alpha);
+      viewHolder.itemView.setTranslationX(dX);
+    } else {
+      super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
     }
-    super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
   }
 
   public interface ActionCompletionContract {
