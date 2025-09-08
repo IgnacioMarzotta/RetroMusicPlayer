@@ -262,6 +262,8 @@ object PreferenceUtil {
 
     val isSongInfo get() = sharedPreferences.getBoolean(EXTRA_SONG_INFO, false)
 
+    val isSwipeToQueueEnabled get() = sharedPreferences.getBoolean(SWIPE_TO_QUEUE, false)
+
     val isPauseOnZeroVolume get() = sharedPreferences.getBoolean(PAUSE_ON_ZERO_VOLUME, false)
 
     var isSleepTimerFinishMusic

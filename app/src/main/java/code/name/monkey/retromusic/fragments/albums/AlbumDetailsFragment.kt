@@ -29,6 +29,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import code.name.monkey.appthemehelper.common.ATHToolbarActivity.getToolbarBackgroundColor
 import code.name.monkey.appthemehelper.util.ToolbarContentTintHelper
@@ -75,7 +76,8 @@ import org.koin.core.parameter.parametersOf
 import java.text.Collator
 
 class AlbumDetailsFragment : AbsMainActivityFragment(R.layout.fragment_album_details),
-    IAlbumClickListener {
+    IAlbumClickListener,
+    SwipeAndDragHelper.ActionCompletionContract {
 
     private var _binding: FragmentAlbumDetailsBinding? = null
     private val binding get() = _binding!!
@@ -167,6 +169,15 @@ class AlbumDetailsFragment : AbsMainActivityFragment(R.layout.fragment_album_det
             MaterialShapeDrawable.createWithElevationOverlay(requireContext())
     }
 
+    override fun onViewMoved(oldPosition: Int, newPosition: Int) { }
+
+    override fun onViewSwiped(position: Int) {
+        val song = simpleSongAdapter.dataSet[position]
+        val swipeHelper = SwipeAndDragHelper(this, requireContext())
+        swipeHelper.addSongToQueue(song)
+        simpleSongAdapter.notifyItemChanged(position)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         serviceActivity?.removeMusicServiceEventListener(detailsViewModel)
@@ -183,6 +194,9 @@ class AlbumDetailsFragment : AbsMainActivityFragment(R.layout.fragment_album_det
             itemAnimator = DefaultItemAnimator()
             isNestedScrollingEnabled = false
             adapter = simpleSongAdapter
+            val swipeHelper = SwipeAndDragHelper(this@AlbumDetailsFragment, requireContext())
+            val itemTouchHelper = ItemTouchHelper(swipeHelper)
+            itemTouchHelper.attachToRecyclerView(this)
         }
     }
 

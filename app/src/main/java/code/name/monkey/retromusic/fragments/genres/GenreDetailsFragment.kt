@@ -24,6 +24,7 @@ import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import code.name.monkey.retromusic.R
@@ -34,12 +35,13 @@ import code.name.monkey.retromusic.fragments.base.AbsMainActivityFragment
 import code.name.monkey.retromusic.helper.menu.GenreMenuHelper
 import code.name.monkey.retromusic.model.Genre
 import code.name.monkey.retromusic.model.Song
+import code.name.monkey.retromusic.util.SwipeAndDragHelper
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.transition.MaterialSharedAxis
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
-class GenreDetailsFragment : AbsMainActivityFragment(R.layout.fragment_playlist_detail) {
+class GenreDetailsFragment : AbsMainActivityFragment(R.layout.fragment_playlist_detail), SwipeAndDragHelper.ActionCompletionContract {
     private val arguments by navArgs<GenreDetailsFragmentArgs>()
     private val detailsViewModel: GenreDetailsViewModel by viewModel {
         parametersOf(arguments.extraGenre)
@@ -79,12 +81,16 @@ class GenreDetailsFragment : AbsMainActivityFragment(R.layout.fragment_playlist_
             layoutManager = LinearLayoutManager(requireContext())
             adapter = songAdapter
         }
+
         songAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
             override fun onChanged() {
                 super.onChanged()
                 checkIsEmpty()
             }
         })
+
+        val swipeHelper = SwipeAndDragHelper(this, requireContext())
+        ItemTouchHelper(swipeHelper).attachToRecyclerView(binding.recyclerView)
     }
 
     fun songs(songs: List<Song>) {
@@ -114,6 +120,14 @@ class GenreDetailsFragment : AbsMainActivityFragment(R.layout.fragment_playlist_
 
     override fun onMenuItemSelected(item: MenuItem): Boolean {
         return GenreMenuHelper.handleMenuClick(requireActivity(), genre, item)
+    }
+
+    override fun onViewMoved(oldPosition: Int, newPosition: Int) { }
+
+    override fun onViewSwiped(position: Int) {
+        val song = songAdapter.dataSet.getOrNull(position) ?: return
+        SwipeAndDragHelper(this, requireContext()).addSongToQueue(song)
+        songAdapter.notifyItemChanged(position)
     }
 
     override fun onDestroyView() {

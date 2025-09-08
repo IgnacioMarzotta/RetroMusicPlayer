@@ -39,8 +39,13 @@ class CategoryInfoAdapter : RecyclerView.Adapter<CategoryInfoAdapter.ViewHolder>
             field = value
             notifyDataSetChanged()
         }
-    private val touchHelper: ItemTouchHelper
+    private lateinit var touchHelper: ItemTouchHelper
+
     fun attachToRecyclerView(recyclerView: RecyclerView?) {
+        if (recyclerView == null) return
+        val context = recyclerView.context
+        val swipeAndDragHelper = SwipeAndDragHelper(this, context)
+        touchHelper = ItemTouchHelper(swipeAndDragHelper)
         touchHelper.attachToRecyclerView(recyclerView)
     }
 
@@ -62,11 +67,13 @@ class CategoryInfoAdapter : RecyclerView.Adapter<CategoryInfoAdapter.ViewHolder>
                 holder.itemView.context.showToast(R.string.you_have_to_select_at_least_one_category)
             }
         }
-        holder.binding.dragView.setOnTouchListener { _: View?, event: MotionEvent ->
-            if (event.actionMasked == MotionEvent.ACTION_DOWN) {
-                touchHelper.startDrag(holder)
+        if (::touchHelper.isInitialized) {
+            holder.binding.dragView.setOnTouchListener { _: View?, event: MotionEvent ->
+                if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+                    touchHelper.startDrag(holder)
+                }
+                false
             }
-            false
         }
     }
 
@@ -89,6 +96,10 @@ class CategoryInfoAdapter : RecyclerView.Adapter<CategoryInfoAdapter.ViewHolder>
         notifyItemMoved(oldPosition, newPosition)
     }
 
+    override fun onViewSwiped(position: Int) {
+        notifyItemChanged(position)
+    }
+
     private fun isLastCheckedCategory(categoryInfo: CategoryInfo): Boolean {
         if (categoryInfo.visible) {
             for (c in categoryInfos) {
@@ -107,10 +118,5 @@ class CategoryInfoAdapter : RecyclerView.Adapter<CategoryInfoAdapter.ViewHolder>
             binding.checkbox.buttonTintList =
                 ColorStateList.valueOf(accentColor(binding.checkbox.context))
         }
-    }
-
-    init {
-        val swipeAndDragHelper = SwipeAndDragHelper(this)
-        touchHelper = ItemTouchHelper(swipeAndDragHelper)
     }
 }
