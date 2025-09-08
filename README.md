@@ -29,11 +29,7 @@
 
 </p>
 
-___
-# We're looking for more contributors and maintainers!
-# If you'd like to be a maintainer, please DM us on [Telegram](https://telegram.me/Daksh777) or [Twitter](https://twitter.com/0xDPJ)
-# All contributions are welcome!
-___
+# This is a fork from the original Retro Music Player, which includes a simple "Swipe to add to queue" gesture functionality for songs, inspired by Spotify's mobile player.
 
 ## 🆕 Material You Design Music Player for Android music lovers 
 
