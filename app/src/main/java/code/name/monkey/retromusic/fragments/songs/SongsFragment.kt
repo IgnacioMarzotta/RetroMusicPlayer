@@ -18,6 +18,7 @@ import android.os.Bundle
 import android.view.*
 import androidx.annotation.LayoutRes
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.ItemTouchHelper
 import code.name.monkey.retromusic.R
 import code.name.monkey.retromusic.adapter.song.SongAdapter
 import code.name.monkey.retromusic.extensions.setUpMediaRouteButton
@@ -27,8 +28,9 @@ import code.name.monkey.retromusic.fragments.base.AbsRecyclerViewCustomGridSizeF
 import code.name.monkey.retromusic.helper.SortOrder.SongSortOrder
 import code.name.monkey.retromusic.util.PreferenceUtil
 import code.name.monkey.retromusic.util.RetroUtil
+import code.name.monkey.retromusic.util.SwipeAndDragHelper
 
-class SongsFragment : AbsRecyclerViewCustomGridSizeFragment<SongAdapter, GridLayoutManager>() {
+class SongsFragment : AbsRecyclerViewCustomGridSizeFragment<SongAdapter, GridLayoutManager>(), SwipeAndDragHelper.ActionCompletionContract {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         libraryViewModel.getSongs().observe(viewLifecycleOwner) {
@@ -37,6 +39,16 @@ class SongsFragment : AbsRecyclerViewCustomGridSizeFragment<SongAdapter, GridLay
             else
                 adapter?.swapDataSet(listOf())
         }
+        val swipeHelper = SwipeAndDragHelper(this, requireContext())
+        ItemTouchHelper(swipeHelper).attachToRecyclerView(recyclerView)
+    }
+
+    override fun onViewMoved(oldPosition: Int, newPosition: Int) { }
+
+    override fun onViewSwiped(position: Int) {
+        val song = adapter?.dataSet?.getOrNull(position) ?: return
+        SwipeAndDragHelper(this, requireContext()).addSongToQueue(song)
+        adapter?.notifyItemChanged(position)
     }
 
     override val titleRes: Int
