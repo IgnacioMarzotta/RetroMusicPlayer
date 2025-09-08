@@ -34,6 +34,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.loader.app.LoaderManager
 import androidx.loader.content.Loader
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import code.name.monkey.appthemehelper.ThemeStore.Companion.accentColor
@@ -51,6 +52,7 @@ import code.name.monkey.retromusic.extensions.showToast
 import code.name.monkey.retromusic.extensions.textColorPrimary
 import code.name.monkey.retromusic.extensions.textColorSecondary
 import code.name.monkey.retromusic.fragments.base.AbsMainActivityFragment
+import code.name.monkey.retromusic.helper.MusicPlayerRemote
 import code.name.monkey.retromusic.helper.MusicPlayerRemote.openQueueKeepShuffleMode
 import code.name.monkey.retromusic.helper.ScanMusicBottomSheet
 
@@ -65,9 +67,11 @@ import code.name.monkey.retromusic.misc.WrappedAsyncTaskLoader
 import code.name.monkey.retromusic.model.Song
 import code.name.monkey.retromusic.providers.BlacklistStore
 import code.name.monkey.retromusic.util.FileUtil
+import code.name.monkey.retromusic.util.PreferenceUtil
 import code.name.monkey.retromusic.util.PreferenceUtil.startDirectory
 import code.name.monkey.retromusic.util.PreferenceUtil.lastDirectory
 import code.name.monkey.retromusic.util.PreferenceUtil.saveLastDirectory
+import code.name.monkey.retromusic.util.SwipeAndDragHelper
 import code.name.monkey.retromusic.util.ThemedFastScroller.create
 import code.name.monkey.retromusic.util.getExternalStorageDirectory
 import code.name.monkey.retromusic.util.getExternalStoragePublicDirectory
@@ -90,9 +94,12 @@ import kotlin.text.get
 class FoldersFragment : AbsMainActivityFragment(R.layout.fragment_folder),
     IMainActivityFragmentCallbacks, SelectionCallback, ICallbacks,
     LoaderManager.LoaderCallbacks<List<File>>, StorageClickListener, IScrollHelper,
-    ScanMusicBottomSheet.ScanMusicStartListener {
+    ScanMusicBottomSheet.ScanMusicStartListener,
+    SwipeAndDragHelper.ActionCompletionContract {
+
     private var _binding: FragmentFolderBinding? = null
     private val binding get() = _binding!!
+    private lateinit var swipeHelper: SwipeAndDragHelper
 
     val toolbar: Toolbar get() = binding.appBarLayout.toolbar
 
@@ -518,6 +525,9 @@ class FoldersFragment : AbsMainActivityFragment(R.layout.fragment_folder),
 
     private fun setUpRecyclerView() {
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        swipeHelper = SwipeAndDragHelper(this, requireContext())
+        val itemTouchHelper = ItemTouchHelper(swipeHelper)
+        itemTouchHelper.attachToRecyclerView(binding.recyclerView)
         create(
             binding.recyclerView
         )
@@ -649,7 +659,29 @@ class FoldersFragment : AbsMainActivityFragment(R.layout.fragment_folder),
         lifecycleScope.launch {
             val pathsToScan = listPaths(fileToScan,AUDIO_FILE_FILTER)
             scanPaths(pathsToScan)
-          }
+        }
+    }
+
+    override fun onViewMoved(oldPosition: Int, newPosition: Int) { }
+
+    override fun onViewSwiped(position: Int) {
+        val file = adapter?.getItem(position) ?: return
+        if (!file.isDirectory) {
+            lifecycleScope.launch(Dispatchers.IO) {
+                listSongs(
+                    requireContext(),
+                    listOf(file),
+                    AUDIO_FILE_FILTER,
+                    fileComparator
+                ) { songs ->
+                    if (songs.isNotEmpty()) {
+                        val song = songs.first()
+                        swipeHelper.addSongToQueue(song)
+                    }
+                }
+            }
+        }
+        adapter?.notifyItemChanged(position)
     }
 
     companion object {

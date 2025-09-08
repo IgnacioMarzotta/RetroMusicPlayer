@@ -19,6 +19,7 @@ import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import code.name.monkey.retromusic.EXTRA_ALBUM_ID
 import code.name.monkey.retromusic.R
@@ -50,7 +51,8 @@ import org.koin.android.ext.android.get
 import java.util.*
 
 abstract class AbsArtistDetailsFragment : AbsMainActivityFragment(R.layout.fragment_artist_details),
-    IAlbumClickListener {
+    IAlbumClickListener,
+    SwipeAndDragHelper.ActionCompletionContract {
     private var _binding: FragmentArtistDetailsBinding? = null
     private val binding get() = _binding!!
 
@@ -114,6 +116,15 @@ abstract class AbsArtistDetailsFragment : AbsMainActivityFragment(R.layout.fragm
             MaterialShapeDrawable.createWithElevationOverlay(requireContext())
     }
 
+    override fun onViewMoved(oldPosition: Int, newPosition: Int) { }
+
+    override fun onViewSwiped(position: Int) {
+        val song = songAdapter.dataSet[position]
+        val swipeHelper = SwipeAndDragHelper(this, requireContext())
+        swipeHelper.addSongToQueue(song)
+        songAdapter.notifyItemChanged(position)
+    }
+
     private fun setupRecyclerView() {
         albumAdapter = HorizontalAlbumAdapter(requireActivity(), ArrayList(), this)
         binding.fragmentArtistContent.albumRecyclerView.apply {
@@ -126,6 +137,9 @@ abstract class AbsArtistDetailsFragment : AbsMainActivityFragment(R.layout.fragm
             itemAnimator = DefaultItemAnimator()
             layoutManager = LinearLayoutManager(this.context)
             adapter = songAdapter
+            val swipeHelper = SwipeAndDragHelper(this@AbsArtistDetailsFragment, requireContext())
+            val itemTouchHelper = ItemTouchHelper(swipeHelper)
+            itemTouchHelper.attachToRecyclerView(this)
         }
     }
 
