@@ -13,7 +13,7 @@ android {
     namespace = "code.name.monkey.retromusic"
 
     defaultConfig {
-        minSdk = 21
+        minSdk = 24
         targetSdk = 36
 
         vectorDrawables {
@@ -21,8 +21,8 @@ android {
         }
 
         applicationId = namespace
-        versionCode = 10650
-        versionName = "6.5.0"
+        versionCode = 10660
+        versionName = "6.6.0"
 
         buildConfigField("String", "GOOGLE_PLAY_LICENSING_KEY", "\"${getProperty(getProperties("../public.properties"), "GOOGLE_PLAY_LICENSE_KEY")}\"")
     }
@@ -170,7 +170,6 @@ dependencies {
     implementation(libs.jaudiotagger)
     implementation(libs.slidableactivity)
     implementation(libs.material.intro)
-    implementation(libs.dhaval2404.imagepicker)
     implementation(libs.fastscroll.library)
     implementation(libs.customactivityoncrash)
     implementation(libs.tankery.circularSeekBar)
