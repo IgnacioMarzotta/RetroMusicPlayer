@@ -100,6 +100,8 @@ class CategoryInfoAdapter : RecyclerView.Adapter<CategoryInfoAdapter.ViewHolder>
         notifyItemChanged(position)
     }
 
+    override fun canSwipeItem(position: Int): Boolean = true
+
     private fun isLastCheckedCategory(categoryInfo: CategoryInfo): Boolean {
         if (categoryInfo.visible) {
             for (c in categoryInfos) {

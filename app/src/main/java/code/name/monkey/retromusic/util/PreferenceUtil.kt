@@ -93,6 +93,7 @@ import code.name.monkey.retromusic.SONG_SORT_ORDER
 import code.name.monkey.retromusic.START_DIRECTORY
 import code.name.monkey.retromusic.SWIPE_ANYWHERE_NOW_PLAYING
 import code.name.monkey.retromusic.SWIPE_DOWN_DISMISS
+import code.name.monkey.retromusic.SWIPE_TO_QUEUE
 import code.name.monkey.retromusic.TAB_TEXT_MODE
 import code.name.monkey.retromusic.TOGGLE_ADD_CONTROLS
 import code.name.monkey.retromusic.TOGGLE_FULL_SCREEN

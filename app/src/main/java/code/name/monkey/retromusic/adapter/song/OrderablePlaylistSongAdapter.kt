@@ -14,6 +14,10 @@
  */
 package code.name.monkey.retromusic.adapter.song
 
+import android.graphics.Color
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.LayerDrawable
+import android.view.Gravity
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
@@ -41,6 +45,7 @@ import com.h6ah4i.android.widget.advrecyclerview.swipeable.SwipeableItemConstant
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.action.SwipeResultAction
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.action.SwipeResultActionDefault
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.SwipeableItemViewHolder
+import androidx.core.graphics.drawable.toDrawable
 
 class OrderablePlaylistSongAdapter(
     private val playlistId: Long,
@@ -163,7 +168,26 @@ class OrderablePlaylistSongAdapter(
         position: Int
     ) { }
 
-    override fun onSetSwipeBackground(holder: ViewHolder, position: Int, type: Int) { }
+    override fun onSetSwipeBackground(holder: ViewHolder, position: Int, type: Int) {
+        if (type == SwipeableItemConstants.DRAWABLE_SWIPE_RIGHT_BACKGROUND) {
+
+            val icon = androidx.core.content.ContextCompat.getDrawable(activity, R.drawable.ic_queue_music)
+            icon?.setTint(Color.WHITE)
+
+            val color = androidx.core.content.ContextCompat.getColor(activity, R.color.widget_circle_button_color)
+            val background = color.toDrawable()
+
+            val layers = arrayOf(background, icon)
+            val layerDrawable = LayerDrawable(layers)
+
+            layerDrawable.setLayerInset(1, 1, 0, 0, 0)
+            layerDrawable.setLayerGravity(1, Gravity.CENTER_VERTICAL or Gravity.START)
+
+            holder.itemView.background = layerDrawable
+        } else {
+            holder.itemView.background = null
+        }
+    }
 
     override fun onSwipeItem(holder: ViewHolder, position: Int, result: Int): SwipeResultAction? {
         if (result == SwipeableItemConstants.RESULT_SWIPED_RIGHT) {
@@ -174,9 +198,17 @@ class OrderablePlaylistSongAdapter(
                     MusicPlayerRemote.playNext(song)
                     val message = activity.getString(R.string.added_title_to_playing_queue, song.title)
                     Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
+                    holder.itemView.background = null
                     notifyItemChanged(position)
                 }
+                override fun onSlideAnimationEnd() {
+                    super.onSlideAnimationEnd()
+                    holder.itemView.background = null
+                }
             }
+        }
+        if (result == SwipeableItemConstants.RESULT_CANCELED) {
+            holder.itemView.background = null
         }
         return null
     }

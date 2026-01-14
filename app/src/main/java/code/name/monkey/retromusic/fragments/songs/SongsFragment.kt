@@ -51,6 +51,8 @@ class SongsFragment : AbsRecyclerViewCustomGridSizeFragment<SongAdapter, GridLay
         adapter?.notifyItemChanged(position)
     }
 
+    override fun canSwipeItem(position: Int): Boolean = true
+
     override val titleRes: Int
         get() = R.string.songs
 

@@ -41,12 +41,14 @@ public class SwipeAndDragHelper extends ItemTouchHelper.Callback {
 
   @Override
   public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
-    int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN;
-    int swipeFlags = 0;
-    if(PreferenceUtil.INSTANCE.isSwipeToQueueEnabled()) {
-      swipeFlags = ItemTouchHelper.RIGHT;
-    }
-    return makeMovementFlags(dragFlags, swipeFlags);
+      int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN;
+      int swipeFlags = 0;
+      if (PreferenceUtil.INSTANCE.isSwipeToQueueEnabled() &&
+              contract.canSwipeItem(viewHolder.getLayoutPosition())) {
+          swipeFlags = ItemTouchHelper.RIGHT;
+      }
+
+      return makeMovementFlags(dragFlags, swipeFlags);
   }
 
   @Override
@@ -118,5 +120,7 @@ public class SwipeAndDragHelper extends ItemTouchHelper.Callback {
     void onViewMoved(int oldPosition, int newPosition);
 
     void onViewSwiped(int position);
+
+    boolean canSwipeItem(int position);
   }
 }

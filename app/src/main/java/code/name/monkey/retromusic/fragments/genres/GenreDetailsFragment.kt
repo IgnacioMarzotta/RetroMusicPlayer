@@ -130,6 +130,8 @@ class GenreDetailsFragment : AbsMainActivityFragment(R.layout.fragment_playlist_
         songAdapter.notifyItemChanged(position)
     }
 
+    override fun canSwipeItem(position: Int): Boolean = true
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

@@ -23,6 +23,9 @@ class ArtistDetailsFragment : AbsArtistDetailsFragment() {
     override val detailsViewModel: ArtistDetailsViewModel by viewModel {
         parametersOf(arguments.extraArtistId, null)
     }
+
+    override fun canSwipeItem(position: Int): Boolean = true
+
     override val artistId: Long
         get() = arguments.extraArtistId
     override val artistName: String?

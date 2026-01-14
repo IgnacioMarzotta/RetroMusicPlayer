@@ -684,6 +684,11 @@ class FoldersFragment : AbsMainActivityFragment(R.layout.fragment_folder),
         adapter?.notifyItemChanged(position)
     }
 
+    override fun canSwipeItem(position: Int): Boolean {
+        val file = adapter?.getItem(position)
+        return file != null && !file.isDirectory
+    }
+
     companion object {
         val TAG: String = FoldersFragment::class.java.simpleName
         val AUDIO_FILE_FILTER = FileFilter { file: File ->

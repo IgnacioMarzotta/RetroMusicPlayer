@@ -178,6 +178,8 @@ class AlbumDetailsFragment : AbsMainActivityFragment(R.layout.fragment_album_det
         simpleSongAdapter.notifyItemChanged(position)
     }
 
+    override fun canSwipeItem(position: Int): Boolean = true
+
     override fun onDestroy() {
         super.onDestroy()
         serviceActivity?.removeMusicServiceEventListener(detailsViewModel)
