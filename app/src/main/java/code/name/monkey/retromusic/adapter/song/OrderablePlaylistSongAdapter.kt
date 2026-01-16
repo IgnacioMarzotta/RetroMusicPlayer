@@ -180,7 +180,7 @@ class OrderablePlaylistSongAdapter(
             val layers = arrayOf(background, icon)
             val layerDrawable = LayerDrawable(layers)
 
-            layerDrawable.setLayerInset(1, 1, 0, 0, 0)
+            layerDrawable.setLayerInset(1, 50, 0, 0, 0)
             layerDrawable.setLayerGravity(1, Gravity.CENTER_VERTICAL or Gravity.START)
 
             holder.itemView.background = layerDrawable
