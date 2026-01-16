@@ -27,6 +27,7 @@ import androidx.core.content.getSystemService
 import androidx.core.view.*
 import androidx.core.widget.doAfterTextChanged
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionManager
@@ -36,6 +37,7 @@ import code.name.monkey.retromusic.databinding.FragmentSearchBinding
 import code.name.monkey.retromusic.extensions.*
 import code.name.monkey.retromusic.fragments.base.AbsMainActivityFragment
 import code.name.monkey.retromusic.util.PreferenceUtil
+import code.name.monkey.retromusic.util.SwipeAndDragHelper
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.shape.MaterialShapeDrawable
@@ -177,6 +179,9 @@ class SearchFragment : AbsMainActivityFragment(R.layout.fragment_search),
                     }
                 }
             })
+            val swipeAndDragHelper = SwipeAndDragHelper(searchAdapter, requireContext())
+            val itemTouchHelper = ItemTouchHelper(swipeAndDragHelper)
+            itemTouchHelper.attachToRecyclerView(this)
         }
     }
 

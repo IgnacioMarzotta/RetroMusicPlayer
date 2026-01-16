@@ -40,13 +40,15 @@ import code.name.monkey.retromusic.model.Artist
 import code.name.monkey.retromusic.model.Genre
 import code.name.monkey.retromusic.model.Song
 import code.name.monkey.retromusic.util.MusicUtil
+import code.name.monkey.retromusic.util.SwipeAndDragHelper
 import com.bumptech.glide.Glide
 import java.util.*
 
 class SearchAdapter(
     private val activity: FragmentActivity,
     private var dataSet: List<Any>
-) : RecyclerView.Adapter<SearchAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<SearchAdapter.ViewHolder>(),
+    SwipeAndDragHelper.ActionCompletionContract{
 
     @SuppressLint("NotifyDataSetChanged")
     fun swapDataSet(dataSet: List<Any>) {
@@ -157,6 +159,26 @@ class SearchAdapter(
     override fun getItemCount(): Int {
         return dataSet.size
     }
+
+    override fun canSwipeItem(position: Int): Boolean {
+        return if (position in dataSet.indices) {
+            dataSet[position] is Song
+        } else {
+            false
+        }
+    }
+
+    override fun onViewSwiped(position: Int) {
+        if (position in dataSet.indices) {
+            val item = dataSet[position]
+            if (item is Song) {
+                MusicPlayerRemote.playNext(item)
+            }
+        }
+        notifyItemChanged(position)
+    }
+
+    override fun onViewMoved(oldPosition: Int, newPosition: Int) { }
 
     inner class ViewHolder(itemView: View, itemViewType: Int) : MediaEntryViewHolder(itemView) {
         init {
